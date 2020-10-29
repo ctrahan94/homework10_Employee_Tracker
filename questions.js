@@ -26,20 +26,16 @@ function init() {
   inquirer.prompt(initQuestions).then((answers) => {
     switch (answers.choices) {
       case "View all employees":
-        viewAllEmployees();
-        break;
+        return viewAllEmployees();
 
       case "View all employees by department":
-        viewAllByDepartment();
-        break;
+        return viewAllByDepartment();
 
       case "View all employees by manager":
-        viewAllByManager();
-        break;
+       return viewAllByManager();
 
       case "Add employee":
-        addEmployee();
-        break;
+        return addEmployee();
 
       case "Remove employee":
         removeEmployee();
@@ -56,7 +52,7 @@ function init() {
       default:
         iAmDone();
         console.log("Done");
-        // connection.done();
+      // connection.done();
       //come back and finish switch/case
     }
   });
@@ -68,4 +64,78 @@ async function viewAllEmployees() {
   init();
 }
 
+async function viewAllByDepartment() {
+  var employees = await db.seeAllDepartment();
+  console.table(employees);
+  init();
+}
+
+async function viewAllByManager() {
+  var employees = await db.seeAllManager();
+  console.table(employees);
+  init();
+}
+
+ function addEmployee() {
+   inquirer.prompt([
+    {
+      type: "input",
+      message: "What is the first name of the employee?",
+      name: "firstName",
+    },
+    {
+      type: "input",
+      message: "What is the last name of the employee?",
+      name: "lastName",
+    },
+    {
+      type: "input",
+      message: "What is your role id?",
+      name: "roleId"
+    },
+  ]).then(answers => {
+   const employees = {
+    first_name : answers.firstName,
+    last_name : answers.lastName,
+    role_id : answers.roleId
+   } 
+    db.createEmployee(employees) 
+    init();
+  })
+}
+
+async function removeEmployee() {}
+
+async function updateEmployeeByRole() {
+  const employees = await db.seeAllEmployees();
+  var employeeChoices = employees.map(({id, first_name, last_name}) => ({
+    name: `${first_name} ${last_name}`,
+    value: id
+  }))
+  var {employeeId} = await inquirer.prompt({
+    type: "list",
+    message: "Which employee do you want to update?",
+    choices: employeeChoices,
+    name: "employeeId"
+  })
+  var roles = await db.seeAllRoles();
+  var roleChoices = roles.map(({id, title}) => ({
+    name: title,
+    value: id
+  }))
+  var {roleId} = await inquirer.prompt({
+    type: "list",
+    message: "Which role would you like to assign to this employee?",
+    choices: roleChoices,
+    name: "roleId"
+  })
+  await db.updateEmployeeRole(employeeId, roleId)
+  init();
+}
+
+async function updateEmployeeByManager() {}
+
 init();
+
+
+//Look at books and authors
