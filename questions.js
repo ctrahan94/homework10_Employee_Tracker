@@ -4,17 +4,17 @@ const { connection } = require("./db");
 const db = require("./db");
 require("console.table");
 
-const figlet = require('figlet');
-figlet('Employee Tracker', function(err, data) {
-    if (err) {
-        console.log('Something went wrong...');
-        console.dir(err);
-        return;
-    }
-    console.log("\n============================")
-    console.log(data)
-    console.log("\n============================\n\n\n\n\n\n")
-    init();
+const figlet = require("figlet");
+figlet("Employee Tracker", function (err, data) {
+  if (err) {
+    console.log("Something went wrong...");
+    console.dir(err);
+    return;
+  }
+  console.log("\n============================");
+  console.log(data);
+  console.log("\n============================\n\n\n\n\n\n");
+  init();
 });
 
 const initQuestions = [
@@ -55,7 +55,7 @@ function init() {
         return addEmployee();
 
       case "Add new role":
-        return addRole();  
+        return addRole();
 
       case "Remove employee":
         removeEmployee();
@@ -64,7 +64,7 @@ function init() {
       case "Update employee by role":
         updateEmployeeByRole();
         break;
- 
+
       default:
         iAmDone();
         console.log("Done");
@@ -75,13 +75,13 @@ function init() {
 }
 
 async function viewAllEmployees() {
-  var employees = await db.seeAllEmployees();
+  const employees = await db.seeAllEmployees();
   console.table(employees);
   init();
 }
 
 async function viewAllByDepartment() {
-  var employees = await db.seeAllDepartment();
+  const employees = await db.seeAllDepartment();
   console.table(employees);
   init();
 }
@@ -92,34 +92,51 @@ async function viewAllRoles() {
   init();
 }
 
-
+async function addDepartment(){
+  inquirer.prompt([
+    {
+      type: "input",
+      message: "What department would you like to add?",
+      name: "deptName"
+    },
+  ])
+  .then((answer) => {
+    const data = {
+      name: answer.deptName
+    };
+    db.createDepartment(data);
+    init();
+  })
+}
 
 function addEmployee() {
-  inquirer.prompt([
-   {
-     type: "input",
-     message: "What is the first name of the employee?",
-     name: "firstName",
-   },
-   {
-     type: "input",
-     message: "What is the last name of the employee?",
-     name: "lastName",
-   },
-   {
-     type: "input",
-     message: "What is your role id?",
-     name: "roleId"
-   },
- ]).then(answers => {
-  const employees = {
-   first_name : answers.firstName,
-   last_name : answers.lastName,
-   role_id : answers.roleId
-  } 
-   db.createEmployee(employees) 
-   init();
- })
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is the first name of the employee?",
+        name: "firstName",
+      },
+      {
+        type: "input",
+        message: "What is the last name of the employee?",
+        name: "lastName",
+      },
+      {
+        type: "input",
+        message: "What is your role id?",
+        name: "roleId",
+      },
+    ])
+    .then((answers) => {
+      const employees = {
+        first_name: answers.firstName,
+        last_name: answers.lastName,
+        role_id: answers.roleId,
+      };
+      db.createEmployee(employees);
+      init();
+    });
 }
 
 function addRole() {
@@ -156,50 +173,49 @@ function addRole() {
 
 async function updateEmployeeByRole() {
   const employees = await db.seeAllEmployees();
-  var employeeChoices = employees.map(({id, first_name, last_name}) => ({
+  var employeeChoices = employees.map(({ id, first_name, last_name }) => ({
     name: `${first_name} ${last_name}`,
-    value: id
-  }))
-  var {employeeId} = await inquirer.prompt({
+    value: id,
+  }));
+  var { employeeId } = await inquirer.prompt({
     type: "list",
     message: "Which employee do you want to update?",
     choices: employeeChoices,
-    name: "employeeId"
-  })
+    name: "employeeId",
+  });
   var roles = await db.seeAllRoles();
-  var roleChoices = roles.map(({id, title}) => ({
+  var roleChoices = roles.map(({ id, title }) => ({
     name: title,
-    value: id
-  }))
-  var {roleId} = await inquirer.prompt({
+    value: id,
+  }));
+  var { roleId } = await inquirer.prompt({
     type: "list",
     message: "Which role would you like to assign to this employee?",
     choices: roleChoices,
-    name: "roleId"
-  })
-  await db.updateEmployeeRole(employeeId, roleId)
+    name: "roleId",
+  });
+  await db.updateEmployeeRole(employeeId, roleId);
   init();
 }
 
-async function removeEmployee(){
+async function removeEmployee() {
   const employees = await db.seeAllEmployees();
-  const employeeChoices = employees.map(({id, first_name, last_name}) => ({
+  const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
     name: `${first_name} ${last_name}`,
-    value: id
+    value: id,
   }));
-  const {first} = await inquirer
-    .prompt([
-      {
-        type: "list",
-        name: "first",
-        message: "What employee would you like to delete?",
-        choices: employeeChoices
-      }
-    ])
-    await db.deleteEmployee(first);
-    init();
+  const { first } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "first",
+      message: "What employee would you like to delete?",
+      choices: employeeChoices,
+    },
+  ]);
+  await db.deleteEmployee(first);
+  init();
 }
 
-async function iAmDone(){
+async function iAmDone() {
   connection.end();
 }

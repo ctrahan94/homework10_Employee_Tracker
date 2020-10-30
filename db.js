@@ -33,6 +33,10 @@ class DB {
       return this.connection.query("INSERT INTO role SET ?", data);
     }
 
+    createDepartment(data){
+      return this.connection.query("INSERT INTO department SET ?", data);
+    }
+
     seeAllRoles(){
       return this.connection.query("SELECT * FROM role");
     }
