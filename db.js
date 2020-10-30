@@ -7,20 +7,30 @@ class DB {
     this.connection = connection;
   }
 
-    seeAllEmployees(){
-      return this.connection.query("SELECT * FROM employee"); 
+  seeAllEmployees() {
+    return this.connection.query(
+      "SELECT employee.id, employee.first_name, employee.last_name, role.title, manager.first_name AS manager_first, manager.last_name AS manager_last, role.salary, department.name AS department FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee manager ON manager.id = employee.manager_id"
+    );
+  }
+
+    seeAllRoles() {
+      return this.connection.query(
+        "SELECT role.id, department.name AS department, role.title FROM role LEFT JOIN department ON role.department_id = department.id"
+      );
     }
 
-    seeAllDepartment(){
-      return this.connection.query("SELECT * FROM department");
+    seeAllDepartment() {
+      return this.connection.query(
+        "SELECT department.name AS department FROM department"
+      );
     }
 
     createEmployee(data){
       return this.connection.query("INSERT INTO employee SET ?" , data); 
     }
 
-    seeAllManager(){
-      return this.connection.query("SELECT manager_id FROM employee");
+    createRole(data){
+      return this.connection.query("INSERT INTO role SET ?", data);
     }
 
     seeAllRoles(){
@@ -30,6 +40,11 @@ class DB {
     updateEmployeeRole(employeeId, roleId){
       return this.connection.query("UPDATE employee SET role_id = ? WHERE id = ?", [roleId, employeeId]);
     }
+
+    deleteEmployee(id){
+      return this.connection.query("DELETE FROM employee WHERE id = ?", id)
+    }
+
 };
 
 module.exports = new DB(connection);

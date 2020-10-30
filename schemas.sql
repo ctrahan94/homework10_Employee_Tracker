@@ -6,7 +6,7 @@ USE trackerDB;
 
 CREATE TABLE department (
   id INT AUTO_INCREMENT,
-  name VARCHAR(30) NOT NULL,
+  name VARCHAR(30),
   PRIMARY KEY (id)
 );
 
@@ -23,6 +23,6 @@ CREATE TABLE employee (
   first_name VARCHAR(30) NOT NULL,
   last_name VARCHAR(30) NOT NULL,
   role_id INT NOT NULL,
-  manager_id INT,
+  manager_id INT NULL,
   PRIMARY KEY (id)
 );

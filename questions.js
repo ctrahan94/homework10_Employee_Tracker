@@ -4,18 +4,32 @@ const { connection } = require("./db");
 const db = require("./db");
 require("console.table");
 
+const figlet = require('figlet');
+figlet('Employee Tracker', function(err, data) {
+    if (err) {
+        console.log('Something went wrong...');
+        console.dir(err);
+        return;
+    }
+    console.log("\n============================")
+    console.log(data)
+    console.log("\n============================\n\n\n\n\n\n")
+    init();
+});
+
 const initQuestions = [
   {
     type: "list",
     message: "What would you like to do?",
     choices: [
       "View all employees",
-      "View all employees by department",
-      "View all employees by manager",
-      "Add employee" /* ask series of questions inside of function  (bundle in object -- when call dbcreate pass in object as argument) */,
+      "View all departments",
+      "View all roles",
+      "Add department",
+      "Add employee",
+      "Add new role",
       "Remove employee",
       "Update employee by role",
-      "Update employee by manager",
       "I am done", // connection.end
     ],
     name: "choices",
@@ -28,14 +42,20 @@ function init() {
       case "View all employees":
         return viewAllEmployees();
 
-      case "View all employees by department":
+      case "View all departments":
         return viewAllByDepartment();
 
-      case "View all employees by manager":
-       return viewAllByManager();
+      case "View all roles":
+        return viewAllRoles();
+
+      case "Add department":
+        return addDepartment();
 
       case "Add employee":
         return addEmployee();
+
+      case "Add new role":
+        return addRole();  
 
       case "Remove employee":
         removeEmployee();
@@ -44,11 +64,7 @@ function init() {
       case "Update employee by role":
         updateEmployeeByRole();
         break;
-
-      case "Update employee by manager":
-        updateEmployeeByManager();
-        break;
-
+ 
       default:
         iAmDone();
         console.log("Done");
@@ -70,41 +86,73 @@ async function viewAllByDepartment() {
   init();
 }
 
-async function viewAllByManager() {
-  var employees = await db.seeAllManager();
-  console.table(employees);
+async function viewAllRoles() {
+  const view = await db.seeAllRoles();
+  console.table(view);
   init();
 }
 
- function addEmployee() {
-   inquirer.prompt([
-    {
-      type: "input",
-      message: "What is the first name of the employee?",
-      name: "firstName",
-    },
-    {
-      type: "input",
-      message: "What is the last name of the employee?",
-      name: "lastName",
-    },
-    {
-      type: "input",
-      message: "What is your role id?",
-      name: "roleId"
-    },
-  ]).then(answers => {
-   const employees = {
-    first_name : answers.firstName,
-    last_name : answers.lastName,
-    role_id : answers.roleId
-   } 
-    db.createEmployee(employees) 
-    init();
-  })
+
+
+function addEmployee() {
+  inquirer.prompt([
+   {
+     type: "input",
+     message: "What is the first name of the employee?",
+     name: "firstName",
+   },
+   {
+     type: "input",
+     message: "What is the last name of the employee?",
+     name: "lastName",
+   },
+   {
+     type: "input",
+     message: "What is your role id?",
+     name: "roleId"
+   },
+ ]).then(answers => {
+  const employees = {
+   first_name : answers.firstName,
+   last_name : answers.lastName,
+   role_id : answers.roleId
+  } 
+   db.createEmployee(employees) 
+   init();
+ })
 }
 
-async function removeEmployee() {}
+function addRole() {
+  return inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "Please enter a role title",
+        name: "title",
+      },
+      {
+        type: "input",
+        message: "Please enter a salary for this role",
+        name: "salary",
+      },
+      {
+        type: "input",
+        message: "Enter a department ID?",
+        name: "department",
+      },
+    ])
+    .then((answers) => {
+      const data = {
+        title: answers.title,
+        salary: answers.salary,
+        department_id: answers.department,
+      };
+      db.createRole(data);
+      console.log("Employee added");
+      console.log(data);
+      init();
+    });
+}
 
 async function updateEmployeeByRole() {
   const employees = await db.seeAllEmployees();
@@ -133,9 +181,21 @@ async function updateEmployeeByRole() {
   init();
 }
 
-async function updateEmployeeByManager() {}
-
-init();
-
-
-//Look at books and authors
+async function removeEmployee(){
+  const employees = await db.seeAllEmployees();
+  const employeeChoices = employees.map(({id, first_name, last_name}) => ({
+    name: `${first_name} ${last_name}`,
+    value: id
+  }));
+  const {first} = await inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "first",
+        message: "What employee would you like to delete?",
+        choices: employeeChoices
+      }
+    ])
+    await db.deleteEmployee(first);
+    init();
+}
