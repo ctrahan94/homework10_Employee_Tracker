@@ -3,7 +3,13 @@
 
 ## Description
 
-Description
+Command-line application that at allows the user to:
+
+  * Add departments, roles, employees
+
+  * View departments, roles, employees
+
+  * Update employee roles
 
 ## Table of Contents
 
@@ -16,11 +22,11 @@ Description
 
 To install necessary dependencies run the following command
 
-npm i
+npm install
 
 ## Usage
 
-Nothing
+Open the terminal and type node question.js to start the application.
 
 ## License
       
@@ -35,6 +41,9 @@ To run test run the following command:
 '''
 npm test
 '''
+
+## How the application works
+![Deployed](assets/images/deployed.gif)
 
 ## Questions
 If you have any questions about the repo contact me directly at c.trahan94@yahoo.com.
