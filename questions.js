@@ -199,3 +199,7 @@ async function removeEmployee(){
     await db.deleteEmployee(first);
     init();
 }
+
+async function iAmDone(){
+  connection.end();
+}
